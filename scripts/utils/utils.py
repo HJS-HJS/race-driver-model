@@ -1,62 +1,12 @@
+import os
 import copy
 import numpy as np
 import csv
 
-def super_ellipse_path():
-    a:float = 60.0
-    b:float = 72.0
-    n:int = 3
-    theta:float = np.pi * 2 / 18
-    L:float = 3.0
-    N = 50
-
-    _theta = np.linspace(0, 2 * np.pi, N, endpoint=False) - theta
-    
-    _r = (np.abs(np.cos(_theta) / a)**n + np.abs(np.sin(_theta) / b)**n)**(-1/n)
-
-    points = np.array([
-        _r * np.cos(_theta),
-        _r * np.sin(_theta),
-    ])
-
-    lengh_vector = np.zeros_like(points)
-
-    for idx in range(N):
-        i_0 = idx
-        i_1 = (idx + 1) % N
-        _vec = np.array([points[0][i_1] - points[0][i_0],
-                         points[1][i_1] - points[1][i_0]])
-        _vec = _vec / np.linalg.norm(_vec) * L
-        lengh_vector[:,i_0] = np.array([_vec[1], -_vec[0]])
-    
-    return points.T, lengh_vector.T
-    
-def example_path():
-
-    points = file_reader("../path/xy/example.csv")
-
-    N:int = len(points)
-    L:float = 0.5
-
-    lengh_vector = np.zeros_like(points)
-    for i in range(N - 1):
-        _vec = np.array([points[i + 1][0] - points[i][0],
-                         points[i + 1][1] - points[i][1]])
-        if _vec[0] == 0:
-            lengh_vector[i,:] = lengh_vector[i-1,:]
-            continue
-        _vec = _vec / np.linalg.norm(_vec) * L
-        lengh_vector[i,:] = np.array([_vec[1], -_vec[0]])
-    _vec = np.array([points[0][0] - points[-1][0],
-                     points[0][1] - points[-1][1]])
-    _vec = _vec / np.linalg.norm(_vec) * L
-    lengh_vector[-1, :] = np.array([_vec[1], -_vec[0]])
-    return points, lengh_vector
-
 def gps_path(path:str="cb", min_lengh:float = 1.5):
-
-    points_in  = file_reader("../path/gps/track_in_"  + path + ".csv")
-    points_out = file_reader("../path/gps/track_out_" + path + ".csv")
+    file_path = os.path.dirname(os.path.abspath(__file__)) + "/../../path/gps/"
+    points_in  = file_reader(file_path + "/track_in_"  + path + ".csv")
+    points_out = file_reader(file_path + "/track_out_" + path + ".csv")
     
     center, points_in, points_out = gps_to_xy(points_in, points_out)
 
